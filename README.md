@@ -56,7 +56,8 @@
 
 ---
 
-## 🔄 Workflow тестирования
+## Workflow тестирования
+
 ```mermaid
 graph TD
   A[QA готовит TEST_PLAN.md] --> B{✅ PR & CI-валидация}
