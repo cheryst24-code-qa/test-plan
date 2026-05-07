@@ -67,11 +67,7 @@ graph TD
   E --> F{Готово к релизу?}
   F -->|Нет| C
   F -->|Да| G[Релиз]
-    
-  style A fill:#e1f5fe
-  style G fill:#c8e6c9
-  style F fill:#fff9c4
-  
+
 ```
 ---
 
