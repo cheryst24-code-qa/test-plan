@@ -1,4 +1,4 @@
-name: 📝 Validate QA Documentation
+name: Validate QA Documentation
 
 on:
   pull_request:
@@ -14,31 +14,24 @@ jobs:
   lint-and-validate:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔍 Lint Markdown (markdownlint)
+      # ✅ ИСПРАВЛЕННЫЙ ШАГ: указываем путь к файлу, а не inline-конфиг
+      - name: Lint Markdown (markdownlint)
         uses: DavidAnson/markdownlint-cli2-action@v16
         with:
           globs: '**/*.md'
-          config: |
-            default: true
-            MD013: false  # Отключаем ограничение длины строки (удобно для таблиц)
-            MD024: false  # Разрешаем дублирующиеся заголовки (в разных файлах)
-            MD033: false  # Разрешаем HTML-теги (бейджи, комментарии)
-            MD041: false  # Не требуем h1 на первой строке (у нас может быть YAML frontmatter)
+          config: '.markdownlint.json'
 
-      - name: 🔎 Check for unfilled placeholders
+      - name: Check for unfilled placeholders
         run: |
-          # Проверяем основные файлы на наличие незаполненных плейсхолдеров
           FILES="TEST_PLAN.md CONTRIBUTING.md TEST_SUMMARY_REPORT.md README.md"
-          # Ищем [...] или [..] или [ ] (пустой чекбокс в начале строки списка)
           PATTERN='\[\.\.\.\]|\[\.\.\]|\[ \]'
           
           FOUND=0
           for file in $FILES; do
             if [ -f "$file" ]; then
-              # grep -n показывает номер строки, || true предотвращает падение скрипта, если ничего не найдено
               MATCHES=$(grep -nE "$PATTERN" "$file" | grep -v '<!-- ignore-placeholder -->' || true)
               if [ -n "$MATCHES" ]; then
                 echo "::error file=$file::❌ Found unfilled placeholders in $file:"
@@ -49,7 +42,7 @@ jobs:
           done
           
           if [ $FOUND -eq 1 ]; then
-            echo "::error::Please fill all placeholders [...] or add <!-- ignore-placeholder --> comment to bypass."
+            echo "::error::Please fill all placeholders [...] or add <!-- ignore-placeholder --> comment."
             exit 1
           else
             echo "✅ All placeholders are filled or ignored."
@@ -61,14 +54,14 @@ jobs:
           use-quiet-mode: 'yes'
           check-modified-files-only: 'yes'
           config-file: '.github/link-check-config.json'
-        continue-on-error: true  # Внешние ссылки могут быть недоступны, не блокируем мерж из-за этого
+        continue-on-error: true
 
   summary:
     needs: lint-and-validate
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: 📊 Job Summary
+      - name: Job Summary
         run: |
           if [ "${{ needs.lint-and-validate.result }}" == "success" ]; then
             echo "✅ Documentation validation passed!" >> $GITHUB_STEP_SUMMARY
